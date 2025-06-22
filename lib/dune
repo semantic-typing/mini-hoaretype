@@ -1,2 +1,13 @@
 (library
- (name mini_hoaretype))
+ (name mini_hoaretype)
+ (libraries core)
+ (preprocess (action (run menhir --infer --explain %{input-file})))
+ (preprocess (action (run ocamllex %{input-file}))))
+
+(menhir
+ (modules python_parser)
+ (infer true)
+ (explain true))
+
+(ocamllex
+ (modules python_lexer))
