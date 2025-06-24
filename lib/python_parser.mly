@@ -67,7 +67,7 @@ assignment:
 
 return_stmt:
   | RETURN expr { Return $2 }
-  | RETURN { Return (Constructor "None" []) }
+  | RETURN { Return (Constructor ("None", [])) }
   ;
 
 import_stmt:
@@ -158,28 +158,28 @@ atom:
   | INT { Int $1 }
   | FLOAT { Float $1 }
   | STRING { String $1 }
-  | TRUE { Constructor "True" [] }
-  | FALSE { Constructor "False" [] }
-  | NONE { Constructor "None" [] }
+  | TRUE { Constructor ("True", []) }
+  | FALSE { Constructor ("False", []) }
+  | NONE { Constructor ("None", []) }
   | list_literal { $1 }
   | dict_literal { $1 }
   | tuple_literal { $1 }
   ;
 
 list_literal:
-  | LBRACKET RBRACKET { Constructor "List" [] }
-  | LBRACKET expr_list RBRACKET { Constructor "List" $2 }
+  | LBRACKET RBRACKET { Constructor ("List", []) }
+  | LBRACKET expr_list RBRACKET { Constructor ("List", $2) }
   ;
 
 dict_literal:
-  | LBRACE RBRACE { Constructor "Dict" [] }
-  | LBRACE key_value_list RBRACE { Constructor "Dict" $2 }
+  | LBRACE RBRACE { Constructor ("Dict", []) }
+  | LBRACE key_value_list RBRACE { Constructor ("Dict", $2) }
   ;
 
 tuple_literal:
-  | LPAREN RPAREN { Constructor "Tuple" [] }
-  | LPAREN expr COMMA RPAREN { Constructor "Tuple" [$2] }
-  | LPAREN expr_list RPAREN { Constructor "Tuple" $2 }
+  | LPAREN RPAREN { Constructor ("Tuple", []) }
+  | LPAREN expr COMMA RPAREN { Constructor ("Tuple", [$2]) }
+  | LPAREN expr COMMA expr_list RPAREN { Constructor ("Tuple", $2 :: $4) }
   ;
 
 expr_list:
@@ -197,4 +197,4 @@ arg_list:
   | expr COMMA arg_list { $1 :: $3 }
   ;
 
-%% 
+%%
