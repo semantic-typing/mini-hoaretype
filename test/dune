@@ -1,3 +1,7 @@
 (test
  (name test_mini_hoaretype)
- (libraries mini_hoaretype))
+ (libraries mini-hoaretype))
+
+(test
+ (name test_type_inference)
+ (libraries mini-hoaretype))

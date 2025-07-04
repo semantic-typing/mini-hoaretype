@@ -29,17 +29,12 @@ rule token = parse
   | "while"    { WHILE }
   | "do"       { DO }
   | "for"      { FOR }
-  | "func"     { FUNC }
-  | "function" { FUNCTION }
   | "fun"      { FUN }
   | "return"   { RETURN }
   | "match"    { MATCH }
   | "with"     { WITH }
   | "data"     { DATA }
   | "import"   { IMPORT }
-  | "from"     { FROM }
-  
-  (* Type names (lowercase) *)
   | "int"      { TYPE_INT }
   | "float"    { TYPE_FLOAT }
   | "string"   { TYPE_STRING }
@@ -67,6 +62,7 @@ rule token = parse
   | "*"        { TIMES }
   | "/"        { DIV }
   | "%"        { MOD }
+  | "**"       { POW }
   | "=="       { EQ }
   | "!="       { NEQ }
   | "<"        { LT }

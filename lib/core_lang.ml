@@ -24,44 +24,6 @@ type unop =
   | Neg
   | Not
 
-(* Core language expressions *)
-type expr =
-  | Var of string                    (* Variable *)
-  | Int of int                       (* Integer literal *)
-  | Float of float                   (* Float literal *)
-  | String of string                 (* String literal *)
-  | Constructor of string * expr list (* Constructor application *)
-  | App of expr * expr list          (* Function application *)
-  | Let of string * expr * expr      (* Let binding: let x = e1 in e2 *)
-  | Lambda of string list * expr     (* Lambda abstraction *)
-  | Match of expr * (pattern * expr) list (* Pattern matching *)
-  | BinOp of binop * expr * expr     (* Binary operation *)
-  | UnaryOp of unop * expr           (* Unary operation *)
-  | FieldAccess of expr * string     (* Field access: e.field *)
-  | Index of expr * expr             (* Index access: e[i] *)
-  | Tuple of expr list               (* Tuple construction *)
-
-(* Patterns for pattern matching *)
-and pattern =
-  | PVar of string                   (* Variable pattern *)
-  | PConstructor of string * pattern list (* Constructor pattern *)
-
-(* Core language statements *)
-type stmt =
-  | Expr of expr                     (* Expression statement *)
-  | Let of string * expr * expr      (* Let binding *)
-  | Return of expr                   (* Return statement *)
-  | If of expr * stmt list * stmt list (* If statement: if e then s1 else s2 *)
-  | While of expr * stmt list        (* While loop *)
-  | For of string * expr * stmt list (* For loop *)
-  | FunDef of string * string list * stmt list (* Function definition *)
-  | ClassDef of string * stmt list   (* Class definition *)
-  | Import of string                 (* Import statement *)
-  | ImportFrom of string * string    (* From import statement *)
-
-(* Core language program *)
-type program = stmt list
-
 (* Core language types *)
 type typ =
   | TVar of string                   (* Type variable *)
@@ -76,6 +38,48 @@ type typ =
   | TString                          (* String type *)
   | TBool                            (* Boolean type *)
   | TUnit                            (* Unit type *)
+
+(* Core language expressions *)
+type expr =
+  | Var of string
+  | Int of int
+  | Float of float
+  | String of string
+  | Bool of bool
+  | Null
+  | Let of string * expr * expr
+  | Lambda of string list * expr
+  | App of expr * expr list
+  | BinOp of binop * expr * expr
+  | UnaryOp of unop * expr
+  | If of expr * expr * expr
+  | Match of expr * (pattern * expr) list
+  | Tuple of expr list
+  | Record of (string * expr) list
+  | FieldAccess of expr * string
+  | Index of expr * expr
+  | Constructor of string * expr list
+
+(* Patterns for pattern matching *)
+and pattern =
+  | PVar of string
+  | PConstructor of string * pattern list
+
+(* Core language statements *)
+type stmt =
+  | Expr of expr
+  | Let of string * expr * stmt
+  | Return of expr
+  | If of expr * stmt list * stmt list
+  | While of expr * stmt list
+  | For of string * expr * stmt list
+  | FunDef of string * string list * stmt list
+  | DataDef of string * (string * typ list) list
+  | Import of string
+  | Block of stmt list
+
+(* Core language program *)
+type program = stmt list
 
 (* Type annotations for expressions *)
 type typed_expr = expr * typ option
@@ -96,6 +100,8 @@ let rec pp_expr = function
   | Int n -> string_of_int n
   | Float f -> string_of_float f
   | String s -> "\"" ^ s ^ "\""
+  | Bool b -> string_of_bool b
+  | Null -> "null"
   | Constructor (c, []) -> c
   | Constructor (c, args) -> c ^ "(" ^ String.concat ", " (List.map pp_expr args) ^ ")"
   | App (func, []) -> pp_expr func
@@ -107,9 +113,15 @@ let rec pp_expr = function
       String.concat "\n" (List.map (fun (p, e) -> "  | " ^ pp_pattern p ^ " -> " ^ pp_expr e) cases)
   | BinOp (op, e1, e2) -> "(" ^ pp_expr e1 ^ " " ^ pp_binop op ^ " " ^ pp_expr e2 ^ ")"
   | UnaryOp (op, e) -> pp_unop op ^ pp_expr e
+  | If (cond, then_expr, else_expr) ->
+      "if " ^ pp_expr cond ^ " then\n" ^
+      pp_expr then_expr ^ "\n" ^
+      "else\n" ^
+      pp_expr else_expr
   | FieldAccess (e, field) -> pp_expr e ^ "." ^ field
   | Index (e, i) -> pp_expr e ^ "[" ^ pp_expr i ^ "]"
   | Tuple es -> "(" ^ String.concat ", " (List.map pp_expr es) ^ ")"
+  | Record fields -> "{" ^ String.concat ", " (List.map (fun (k, v) -> k ^ ": " ^ pp_expr v) fields) ^ "}"
 
 and pp_pattern = function
   | PVar x -> x
@@ -140,10 +152,25 @@ and pp_unop = function
   | Neg -> "-"
   | Not -> "not "
 
+let rec pp_type = function
+  | TVar x -> x
+  | TInt -> "int"
+  | TFloat -> "float"
+  | TString -> "string"
+  | TBool -> "bool"
+  | TUnit -> "unit"
+  | TArrow (t1, t2) -> "(" ^ pp_type t1 ^ " -> " ^ pp_type t2 ^ ")"
+  | TConstructor (c, []) -> c
+  | TConstructor (c, ts) -> c ^ "(" ^ String.concat ", " (List.map pp_type ts) ^ ")"
+  | TTuple ts -> "(" ^ String.concat " * " (List.map pp_type ts) ^ ")"
+  | TUnion (t1, t2) -> "(" ^ pp_type t1 ^ " | " ^ pp_type t2 ^ ")"
+  | TIntersection (t1, t2) -> "(" ^ pp_type t1 ^ " & " ^ pp_type t2 ^ ")"
+  | TNegation t -> "~" ^ pp_type t
+
 (* Pretty printer for statements *)
 let rec pp_stmt = function
   | Expr e -> pp_expr e
-  | Let (x, e1, e2) -> "let " ^ x ^ " = " ^ pp_expr e1 ^ " in " ^ pp_stmt e2
+  | Let (x, e1, s2) -> "let " ^ x ^ " = " ^ pp_expr e1 ^ " in " ^ pp_stmt s2
   | Return e -> "return " ^ pp_expr e
   | If (cond, then_stmts, else_stmts) ->
       "if " ^ pp_expr cond ^ " then\n" ^
@@ -159,28 +186,13 @@ let rec pp_stmt = function
   | FunDef (name, params, body) ->
       "def " ^ name ^ "(" ^ String.concat ", " params ^ "):\n" ^
       String.concat "\n" (List.map (fun s -> "  " ^ pp_stmt s) body)
-  | ClassDef (name, body) ->
-      "class " ^ name ^ ":\n" ^
-      String.concat "\n" (List.map (fun s -> "  " ^ pp_stmt s) body)
+  | DataDef (name, fields) ->
+      "data " ^ name ^ ":\n" ^
+      String.concat "\n" (List.map (fun (k, ts) -> "  " ^ k ^ ": " ^ String.concat ", " (List.map pp_type ts)) fields)
   | Import module_name -> "import " ^ module_name
-  | ImportFrom (module_name, item) -> "from " ^ module_name ^ " import " ^ item
+  | Block stmts -> "{\n" ^ String.concat "\n" (List.map pp_stmt stmts) ^ "\n}"
 
 (* Pretty printer for programs *)
 let pp_program program =
   String.concat "\n" (List.map pp_stmt program)
 
-(* Pretty printer for types *)
-let rec pp_type = function
-  | TVar x -> x
-  | TInt -> "int"
-  | TFloat -> "float"
-  | TString -> "string"
-  | TBool -> "bool"
-  | TUnit -> "unit"
-  | TArrow (t1, t2) -> "(" ^ pp_type t1 ^ " -> " ^ pp_type t2 ^ ")"
-  | TConstructor (c, []) -> c
-  | TConstructor (c, ts) -> c ^ "(" ^ String.concat ", " (List.map pp_type ts) ^ ")"
-  | TTuple ts -> "(" ^ String.concat " * " (List.map pp_type ts) ^ ")"
-  | TUnion (t1, t2) -> "(" ^ pp_type t1 ^ " | " ^ pp_type t2 ^ ")"
-  | TIntersection (t1, t2) -> "(" ^ pp_type t1 ^ " & " ^ pp_type t2 ^ ")"
-  | TNegation t -> "~" ^ pp_type t 
