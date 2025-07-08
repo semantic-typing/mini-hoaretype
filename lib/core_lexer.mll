@@ -40,6 +40,7 @@ rule token = parse
   | "string"   { TYPE_STRING }
   | "bool"     { TYPE_BOOL }
   | "unit"     { TYPE_UNIT }
+  | "done"     { DONE }
   
   (* Boolean literals *)
   | "true"     { TRUE }
