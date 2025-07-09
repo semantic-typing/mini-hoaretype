@@ -10,6 +10,7 @@ open Core_lang
 %token PLUS MINUS TIMES DIV MOD POW EQ NEQ LT LE GT GE AND OR NOT PIPE ARROW COLON ASSIGN
 %token LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE COMMA SEMICOLON DOT EOF
 %token TYPE_INT TYPE_FLOAT TYPE_STRING TYPE_BOOL TYPE_UNIT
+%token DONE
 
 %start program
 %type <Core_lang.program> program
@@ -21,13 +22,13 @@ program:
 ;
 
 stmt_list:
-  | stmt { [$1] }
   | stmt SEMICOLON stmt_list { $1 :: $3 }
+  | stmt { [$1] }
 ;
 
 stmt:
   | let_stmt { $1 }
-  | expr { Expr $1 }
+  | assign_stmt { $1 }
   | return_stmt { $1 }
   | if_stmt { $1 }
   | while_stmt { $1 }
@@ -39,7 +40,11 @@ stmt:
 ;
 
 let_stmt:
-  | LET IDENT ASSIGN expr IN stmt { Let ($2, $4, $6) }
+  | LET IDENT ASSIGN expr IN block_expr { Let ($2, $4, $6) }
+;
+
+assign_stmt:
+  | IDENT ASSIGN expr { Assign ($1, $3) }
 ;
 
 return_stmt:
@@ -51,7 +56,7 @@ if_stmt:
 ;
 
 while_stmt:
-  | WHILE expr DO stmt_list { While ($2, $4) }
+  | WHILE expr DO stmt_list DONE { While ($2, $4) }
 ;
 
 for_stmt:
@@ -91,7 +96,7 @@ param_list:
 ;
 
 expr:
-  | LET IDENT ASSIGN expr IN expr { Let ($2, $4, $6) }
+  | LET IDENT ASSIGN expr IN block_expr { Let ($2, $4, $6) }
   | IF expr THEN expr ELSE expr { If ($2, $4, $6) }
   | lambda_expr { $1 }
   | match_expr { $1 }
@@ -172,7 +177,7 @@ primary_expr:
   | record_literal { $1 }
   | field_access { $1 }
   | index_access { $1 }
-  ;
+;
 
 literal:
   | INT { Int $1 }
@@ -243,4 +248,13 @@ constructor_type:
   | IDENT LPAREN type_list RPAREN { TConstructor ($1, $3) }
   | IDENT { TConstructor ($1, []) }
 ;
+
+block_expr:
+  | stmt_list expr { Block ($1 @ [Expr $2]) }
+  | stmt_list { Block $1 }
+  | expr { $1 }
+  | LBRACE stmt_list RBRACE expr { Block ($2 @ [Expr $4]) }
+  | LBRACE stmt_list RBRACE { Block $2 }
+;
+
 %% 
