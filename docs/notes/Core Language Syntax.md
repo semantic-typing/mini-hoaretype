@@ -167,6 +167,57 @@ data T = C1(t1, t2, ...) | C2(t3, t4, ...) | ...
 import M
 from M import x
 ```
+
+## Block Syntax
+
+A block is a sequence of statements (let, return, if, while, for, etc.), each ending with a semicolon `;`, followed by a final expression (without a semicolon). The value of the block is the value of the final expression. Braces `{ ... }` are optional for grouping, but not required.
+
+**Syntax:**
+
+```
+block ::= stmt_list expr
+       | expr
+       | { stmt_list }
+       | { stmt_list expr }
+```
+- `stmt_list` is one or more statements, each ending with a semicolon `;`.
+- `expr` is any expression (no semicolon after the final expression).
+
+**Examples:**
+
+```
+let x = 1 in
+let y = 2 in
+x + y
+```
+
+```
+while x > 0 do
+  x := x - 1;
+x
+```
+
+```
+{
+  let x = 1 in
+  let y = 2 in
+  x + y
+}
+```
+
+```
+{
+  while x > 0 do
+    x := x - 1;
+  x
+}
+```
+
+**Notes:**
+- Do not use `done` to end a block.
+- Do not put a semicolon after the final expression in a block.
+- Braces `{ ... }` are optional for grouping, not required.
+
 ## Error handling
 
 ### Parse Errors
