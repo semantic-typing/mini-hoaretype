@@ -23,7 +23,7 @@ program:
 
 stmt_list:
   | stmt SEMICOLON stmt_list { $1 :: $3 }
-  | stmt { [$1] }
+  | stmt SEMICOLON { [$1] }
 ;
 
 stmt:
@@ -249,12 +249,16 @@ constructor_type:
   | IDENT { TConstructor ($1, []) }
 ;
 
+block_body:
+  | stmt SEMICOLON block_body { $1 :: $3 }
+  | expr { [Expr $1] }
+;
+
 block_expr:
-  | stmt_list expr { Block ($1 @ [Expr $2]) }
-  | stmt_list { Block $1 }
+  | block_body { Block $1 }
   | expr { $1 }
-  | LBRACE stmt_list RBRACE expr { Block ($2 @ [Expr $4]) }
-  | LBRACE stmt_list RBRACE { Block $2 }
+  | LBRACE block_body RBRACE { Block $2 }
+  | LBRACE block_body RBRACE expr { Block ($2 @ [Expr $4]) }
 ;
 
 %% 
