@@ -1,0 +1,9 @@
+(executable
+ (name core_parser_main)
+ (modules core_parser_main)
+ (libraries mini_hoaretype)
+ (flags (:standard -w -32-38))) 
+
+ (executable
+ (name        core_parser_test)
+ (libraries   mini_hoaretype))

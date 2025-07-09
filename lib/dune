@@ -1,12 +1,14 @@
 (library
  (name mini_hoaretype)
- (modules core_lang python_lexer python_parser python_to_core)
+ (wrapped  false) 
+ (modules core_lang core_lexer core_parser Core_parser_module)
+ (flags (:standard -w -32-33-38))
 )
 
 (menhir
- (modules python_parser)
+ (modules python_parser core_parser)
  (infer true)
  (explain true))
 
 (ocamllex
- (modules python_lexer))
+ (modules python_lexer core_lexer))
