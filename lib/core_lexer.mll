@@ -41,6 +41,7 @@ rule token = parse
   | "bool"     { TYPE_BOOL }
   | "unit"     { TYPE_UNIT }
   | "done"     { DONE }
+  | "rec"      { REC }
   
   (* Boolean literals *)
   | "true"     { TRUE }

@@ -11,6 +11,7 @@ open Core_lang
 %token LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE COMMA SEMICOLON DOT EOF
 %token TYPE_INT TYPE_FLOAT TYPE_STRING TYPE_BOOL TYPE_UNIT
 %token DONE
+%token REC
 
 %start program
 %type <Core_lang.program> program
@@ -23,7 +24,9 @@ program:
 
 stmt_list:
   | stmt SEMICOLON stmt_list { $1 :: $3 }
+  | stmt SEMICOLON expr { $1 :: [Expr $3] }
   | stmt SEMICOLON { [$1] }
+  | expr { [Expr $1] }
 ;
 
 stmt:
@@ -39,8 +42,18 @@ stmt:
   | block_stmt { $1 }
 ;
 
+let_in_expr:
+  | expr { $1 }
+  | ocaml_block {
+      match $1 with
+      | [Expr e] -> e
+      | stmts -> Block stmts
+    }
+;
+
 let_stmt:
-  | LET IDENT ASSIGN expr IN block_expr { Let ($2, $4, $6) }
+  | LET REC IDENT ASSIGN expr IN let_in_expr { Let ($3, $5, $7) }
+  | LET IDENT ASSIGN expr IN let_in_expr { Let ($2, $4, $6) }
 ;
 
 assign_stmt:
@@ -52,15 +65,15 @@ return_stmt:
 ;
 
 if_stmt:
-  | IF expr THEN stmt_list ELSE stmt_list { If ($2, $4, $6) }
+  | IF expr THEN ocaml_block ELSE ocaml_block { If ($2, $4, $6) }
 ;
 
 while_stmt:
-  | WHILE expr DO stmt_list DONE { While ($2, $4) }
+  | WHILE expr DO ocaml_block DONE { While ($2, $4) }
 ;
 
 for_stmt:
-  | FOR IDENT IN expr DO stmt_list { For ($2, $4, $6) }
+  | FOR IDENT IN expr DO ocaml_block { For ($2, $4, $6) }
 ;
 
 func_def:
@@ -96,14 +109,26 @@ param_list:
 ;
 
 expr:
-  | LET IDENT ASSIGN expr IN block_expr { Let ($2, $4, $6) }
+  | LET REC IDENT ASSIGN expr IN let_in_expr { Let ($3, $5, $7) }
+  | LET IDENT ASSIGN expr IN let_in_expr { Let ($2, $4, $6) }
   | IF expr THEN expr ELSE expr { If ($2, $4, $6) }
+  | IF expr THEN ocaml_block ELSE ocaml_block {
+      let left = match $4 with [Expr e] -> e | stmts -> Block stmts in
+      let right = match $6 with [Expr e] -> e | stmts -> Block stmts in
+      If ($2, left, right)
+    }
   | lambda_expr { $1 }
   | match_expr { $1 }
   | app_expr { $1 }
   | bin_expr { $1 }
   | unary_expr { $1 }
   | primary_expr { $1 }
+;
+
+ocaml_block:
+  | stmt SEMICOLON ocaml_block { $1 :: $3 }
+  | stmt SEMICOLON expr { $1 :: [Expr $3] }
+  | expr { [Expr $1] }
 ;
 
 lambda_expr:
@@ -135,8 +160,8 @@ pattern_list:
 ;
 
 app_expr:
-  | primary_expr LPAREN expr_list RPAREN { App ($1, $3) }
-  | primary_expr primary_expr { App ($1, [$2]) }
+  | app_expr primary_expr { App ($1, [$2]) }
+  | primary_expr { $1 }
 ;
 
 expr_list:
@@ -251,14 +276,8 @@ constructor_type:
 
 block_body:
   | stmt SEMICOLON block_body { $1 :: $3 }
+  | stmt SEMICOLON expr { $1 :: [Expr $3] }
   | expr { [Expr $1] }
-;
-
-block_expr:
-  | block_body { Block $1 }
-  | expr { $1 }
-  | LBRACE block_body RBRACE { Block $2 }
-  | LBRACE block_body RBRACE expr { Block ($2 @ [Expr $4]) }
 ;
 
 %% 

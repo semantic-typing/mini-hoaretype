@@ -1,0 +1,9 @@
+let sum_tuple = fun t ->
+  match t with
+  | (a, b, c) -> a + b + c
+in
+let arr = (1, 2, 3) in
+let total = sum_tuple arr in
+for i in 0 do
+  let x = total * i in
+  x + 1 

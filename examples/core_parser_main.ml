@@ -2,7 +2,7 @@ open Core_parser_module
 open Core_lang
 
 let () =
-  let path = "examples/cond.fl" in
+  let path = "examples/complex1.fl" in
   Printf.printf "Parsing %s...\n" path;
   match parse_core_file path with
   | Ok ast ->

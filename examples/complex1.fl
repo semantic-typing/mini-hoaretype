@@ -1,0 +1,14 @@
+let fact = fun n ->
+  let rec f = fun x ->
+    if x == 0 then 1 else x * f (x - 1)
+  in f n
+in
+let result = fact 5 in
+if result > 100 then
+  result
+else
+  let y = 2 * result in
+    while y < 200 do
+      y = y + 10;
+    done;
+  y 
