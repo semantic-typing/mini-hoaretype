@@ -1,0 +1,15 @@
+let a = 0 in
+let b = 1 in
+let next = 0 in
+let i = 0 in
+let fib = 0 in
+  while i <= 10 do
+    next = a + b;
+    a = b;
+    b = next;
+    sum = sum + a;
+  done;
+if sum % 7 == 0 then
+  ("Sum is divisible by 7", sum)
+else
+  ("Sum is NOT divisible by 7", sum)
