@@ -103,6 +103,7 @@ expr:
   | app_expr { $1 }
   | bin_expr { $1 }
   | unary_expr { $1 }
+  | tuple_expr { $1 }
   | primary_expr { $1 }
 ;
 
@@ -126,6 +127,7 @@ match_branch:
 pattern:
   | IDENT { PVar $1 }
   | IDENT LPAREN pattern_list RPAREN { PConstructor ($1, $3) }
+  | LPAREN pattern_list RPAREN { PTuple $2 }
 ;
 
 pattern_list:
@@ -190,6 +192,7 @@ literal:
 
 tuple_expr:
   | LPAREN expr COMMA expr_list RPAREN { Tuple ($2 :: $4) }
+  | LPAREN expr COMMA expr RPAREN { Tuple [$2; $4] }
 ;
 
 record_literal:
