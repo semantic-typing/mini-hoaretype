@@ -5,4 +5,8 @@ in
 let arr = (1, 2, 3) in
 let total = sum_tuple(arr) in
 let x = 0 in
-for i in arr do x = x + i;
+let i = 0 in
+    for i in arr do 
+        x = x  + total * i;
+    done;
+    total
