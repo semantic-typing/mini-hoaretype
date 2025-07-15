@@ -151,7 +151,7 @@ for x in e1 do
 func f(x1: t1, x2: t2, ..., xn: tn): t =
   s1
 ```
-hoặc
+or
 ```
 function f(x1: t1, x2: t2, ..., xn: tn): t =
   s1
@@ -181,41 +181,10 @@ block ::= stmt_list expr
        | { stmt_list expr }
 ```
 - `stmt_list` is one or more statements, each ending with a semicolon `;`.
-- `expr` is any expression (no semicolon after the final expression).
-
-**Examples:**
-
-```
-let x = 1 in
-let y = 2 in
-x + y
-```
-
-```
-while x > 0 do
-  x := x - 1;
-x
-```
-
-```
-{
-  let x = 1 in
-  let y = 2 in
-  x + y
-}
-```
-
-```
-{
-  while x > 0 do
-    x := x - 1;
-  x
-}
-```
 
 **Notes:**
-- Do not use `done` to end a block.
-- Do not put a semicolon after the final expression in a block.
+- Do not use `done` to end a block except While.
+- Put a semicolon after the final expression in a block.có
 - Braces `{ ... }` are optional for grouping, not required.
 
 ## Error handling

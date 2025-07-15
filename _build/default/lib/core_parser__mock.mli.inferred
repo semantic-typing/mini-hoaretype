@@ -1,0 +1,101 @@
+type token =
+    WITH
+  | WHILE
+  | TYPE_UNIT
+  | TYPE_STRING
+  | TYPE_INT
+  | TYPE_FLOAT
+  | TYPE_BOOL
+  | TRUE
+  | TIMES
+  | THEN
+  | STRING of string
+  | SEMICOLON
+  | RPAREN
+  | RETURN
+  | RBRACKET
+  | RBRACE
+  | POW
+  | PLUS
+  | PIPE
+  | OR
+  | NULL
+  | NOT
+  | NEQ
+  | MOD
+  | MINUS
+  | MATCH
+  | LT
+  | LPAREN
+  | LET
+  | LE
+  | LBRACKET
+  | LBRACE
+  | INT of int
+  | IN
+  | IMPORT
+  | IF
+  | IDENT of string
+  | GT
+  | GE
+  | FUN
+  | FOR
+  | FLOAT of float
+  | FALSE
+  | EQ
+  | EOF
+  | ELSE
+  | DOT
+  | DONE
+  | DO
+  | DIV
+  | DATA
+  | COMMA
+  | COLON
+  | ASSIGN
+  | ARROW
+  | AND
+val menhir_begin_marker : int
+val xv_while_stmt : Core_lang.stmt
+val xv_unary_expr : Core_lang.expr
+val xv_type_list : Core_lang.typ list
+val xv_type_expr : Core_lang.typ
+val xv_tuple_type : Core_lang.typ
+val xv_tuple_expr : Core_lang.expr
+val xv_stmt_list : Core_lang.program
+val xv_stmt : Core_lang.stmt
+val xv_return_stmt : Core_lang.stmt
+val xv_record_literal : Core_lang.expr
+val xv_program : Core_lang.program
+val xv_primary_expr : Core_lang.expr
+val xv_pattern_list : Core_lang.pattern list
+val xv_pattern : Core_lang.pattern
+val xv_param_list : string list
+val xv_match_expr : Core_lang.expr
+val xv_match_branches : (Core_lang.pattern * Core_lang.expr) list
+val xv_match_branch : Core_lang.pattern * Core_lang.expr
+val xv_literal : Core_lang.expr
+val xv_let_stmt : Core_lang.stmt
+val xv_lambda_expr : Core_lang.expr
+val xv_index_access : Core_lang.expr
+val xv_import_stmt : Core_lang.stmt
+val xv_if_stmt : Core_lang.stmt
+val xv_func_def : Core_lang.stmt
+val xv_for_stmt : Core_lang.stmt
+val xv_field_list : (string * Core_lang.expr) list
+val xv_field_access : Core_lang.expr
+val xv_field : string * Core_lang.expr
+val xv_expr_list : Core_lang.expr list
+val xv_expr : Core_lang.expr
+val xv_data_def : Core_lang.stmt
+val xv_constructor_type : Core_lang.typ
+val xv_constructor_defs : (string * Core_lang.typ list) list
+val xv_constructor_def : string * Core_lang.typ list
+val xv_block_stmt : Core_lang.stmt
+val xv_block_expr : Core_lang.expr
+val xv_block_body : Core_lang.stmt list
+val xv_bin_expr : Core_lang.expr
+val xv_basic_type : Core_lang.typ
+val xv_assign_stmt : Core_lang.stmt
+val xv_app_expr : Core_lang.expr
+val menhir_end_marker : int
