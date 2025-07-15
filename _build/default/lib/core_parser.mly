@@ -103,6 +103,7 @@ expr:
   | app_expr { $1 }
   | bin_expr { $1 }
   | unary_expr { $1 }
+  | tuple_expr { $1 }
   | primary_expr { $1 }
 ;
 
@@ -126,6 +127,7 @@ match_branch:
 pattern:
   | IDENT { PVar $1 }
   | IDENT LPAREN pattern_list RPAREN { PConstructor ($1, $3) }
+  | LPAREN pattern_list RPAREN { PTuple $2 }
 ;
 
 pattern_list:
@@ -146,20 +148,20 @@ expr_list:
 ;
 
 bin_expr:
-  | bin_expr PLUS bin_expr { BinOp (Plus, $1, $3) }
-  | bin_expr MINUS bin_expr { BinOp (Minus, $1, $3) }
-  | bin_expr TIMES bin_expr { BinOp (Times, $1, $3) }
-  | bin_expr DIV bin_expr { BinOp (Div, $1, $3) }
-  | bin_expr MOD bin_expr { BinOp (Mod, $1, $3) }
-  | bin_expr POW bin_expr { BinOp (Pow, $1, $3) }
-  | bin_expr EQ bin_expr { BinOp (Eq, $1, $3) }
-  | bin_expr NEQ bin_expr { BinOp (Neq, $1, $3) }
-  | bin_expr LT bin_expr { BinOp (Lt, $1, $3) }
-  | bin_expr LE bin_expr { BinOp (Le, $1, $3) }
-  | bin_expr GT bin_expr { BinOp (Gt, $1, $3) }
-  | bin_expr GE bin_expr { BinOp (Ge, $1, $3) }
-  | bin_expr AND bin_expr { BinOp (And, $1, $3) }
-  | bin_expr OR bin_expr { BinOp (Or, $1, $3) }
+  | expr PLUS expr { BinOp (Plus, $1, $3) }
+  | expr MINUS expr { BinOp (Minus, $1, $3) }
+  | expr TIMES expr { BinOp (Times, $1, $3) }
+  | expr DIV expr { BinOp (Div, $1, $3) }
+  | expr MOD expr { BinOp (Mod, $1, $3) }
+  | expr POW expr { BinOp (Pow, $1, $3) }
+  | expr EQ expr { BinOp (Eq, $1, $3) }
+  | expr NEQ expr { BinOp (Neq, $1, $3) }
+  | expr LT expr { BinOp (Lt, $1, $3) }
+  | expr LE expr { BinOp (Le, $1, $3) }
+  | expr GT expr { BinOp (Gt, $1, $3) }
+  | expr GE expr { BinOp (Ge, $1, $3) }
+  | expr AND expr { BinOp (And, $1, $3) }
+  | expr OR expr { BinOp (Or, $1, $3) }
   | unary_expr { $1 }
 ;
 
@@ -190,6 +192,7 @@ literal:
 
 tuple_expr:
   | LPAREN expr COMMA expr_list RPAREN { Tuple ($2 :: $4) }
+  | LPAREN expr COMMA expr RPAREN { Tuple [$2; $4] }
 ;
 
 record_literal:

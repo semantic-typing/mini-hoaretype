@@ -1,5 +1,5 @@
 
-** Conflict (shift/reduce) in state 228.
+** Conflict (shift/reduce) in state 232.
 ** Token involved: PIPE
 ** This state is reached from program after reading:
 
@@ -14,7 +14,7 @@ match_expr
 MATCH expr WITH match_branches 
                 (?)
 
-** In state 228, looking ahead at PIPE, shifting is permitted
+** In state 232, looking ahead at PIPE, shifting is permitted
 ** because of the following sub-derivation:
 
 match_branch 
@@ -25,7 +25,7 @@ PIPE pattern ARROW expr
                                                 match_branch 
                                                 . PIPE pattern ARROW expr 
 
-** In state 228, looking ahead at PIPE, reducing production
+** In state 232, looking ahead at PIPE, reducing production
 ** match_branches -> match_branch
 ** is permitted because of the following sub-derivation:
 
@@ -35,7 +35,42 @@ PIPE pattern ARROW expr // lookahead token is inherited
                    MATCH expr WITH match_branches // lookahead token is inherited
                                    match_branch . 
 
-** Conflict (reduce/reduce) in state 212.
+** Conflict (shift/reduce) in state 230.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+MATCH expr WITH PIPE pattern ARROW expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+(?)
+
+** In state 230, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+match_expr 
+MATCH expr WITH match_branches 
+                match_branch 
+                PIPE pattern ARROW expr 
+                                   bin_expr 
+                                   expr . TIMES expr 
+
+** In state 230, looking ahead at TIMES, reducing production
+** match_branch -> PIPE pattern ARROW expr
+** is permitted because of the following sub-derivation:
+
+bin_expr 
+expr TIMES expr // lookahead token appears
+match_expr // lookahead token is inherited
+MATCH expr WITH match_branches // lookahead token is inherited
+                match_branch // lookahead token is inherited
+                PIPE pattern ARROW expr . 
+
+** Conflict (reduce/reduce) in state 213.
 ** Token involved: SEMICOLON
 ** This state is reached from program after reading:
 
@@ -47,7 +82,7 @@ LET IDENT ASSIGN expr IN LET IDENT ASSIGN expr IN block_expr
 program 
 (?)
 
-** In state 212, looking ahead at SEMICOLON, reducing production
+** In state 213, looking ahead at SEMICOLON, reducing production
 ** expr -> LET IDENT ASSIGN expr IN block_expr
 ** is permitted because of the following sub-derivation:
 
@@ -58,7 +93,7 @@ LET IDENT ASSIGN expr IN block_expr // lookahead token is inherited
                          expr // lookahead token is inherited
                          LET IDENT ASSIGN expr IN block_expr . 
 
-** In state 212, looking ahead at SEMICOLON, reducing production
+** In state 213, looking ahead at SEMICOLON, reducing production
 ** let_stmt -> LET IDENT ASSIGN expr IN block_expr
 ** is permitted because of the following sub-derivation:
 
@@ -69,9 +104,70 @@ LET IDENT ASSIGN expr IN block_expr
                          let_stmt // lookahead token is inherited
                          LET IDENT ASSIGN expr IN block_expr . 
 
-** Conflict (reduce/reduce) in state 202.
-** Tokens involved: WITH THEN SEMICOLON RPAREN RBRACKET RBRACE PIPE IN EOF ELSE DO COMMA
-** The following explanations concentrate on token SEMICOLON.
+** Conflict (shift/reduce) in state 212.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+LET IDENT ASSIGN expr IN LBRACE block_body RBRACE expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+(?)
+
+** In state 212, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+LET IDENT ASSIGN expr IN block_expr 
+                         LBRACE block_body RBRACE expr 
+                                                  bin_expr 
+                                                  expr . TIMES expr 
+
+** In state 212, looking ahead at TIMES, reducing production
+** block_expr -> LBRACE block_body RBRACE expr
+** is permitted because of the following sub-derivation:
+
+bin_expr 
+expr TIMES expr // lookahead token appears
+LET IDENT ASSIGN expr IN block_expr // lookahead token is inherited
+                         LBRACE block_body RBRACE expr . 
+
+** Conflict (shift/reduce) in state 211.
+** Token involved: MINUS
+** This state is reached from program after reading:
+
+LET IDENT ASSIGN expr IN LBRACE block_body RBRACE
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+(?)
+
+** In state 211, looking ahead at MINUS, reducing production
+** block_expr -> LBRACE block_body RBRACE
+** is permitted because of the following sub-derivation:
+
+bin_expr 
+expr MINUS expr // lookahead token appears
+LET IDENT ASSIGN expr IN block_expr // lookahead token is inherited
+                         LBRACE block_body RBRACE . 
+
+** In state 211, looking ahead at MINUS, shifting is permitted
+** because of the following sub-derivation:
+
+LET IDENT ASSIGN expr IN block_expr 
+                         LBRACE block_body RBRACE expr 
+                                                  unary_expr 
+                                                  . MINUS unary_expr 
+
+** Conflict (shift/reduce/reduce) in state 203.
+** Tokens involved: WITH TIMES THEN SEMICOLON RPAREN RBRACKET RBRACE POW PLUS PIPE OR NEQ MOD MINUS LT LE IN GT GE EQ EOF ELSE DO DIV COMMA AND
+** The following explanations concentrate on token TIMES.
 ** This state is reached from program after reading:
 
 LET IDENT ASSIGN expr IN expr
@@ -80,26 +176,72 @@ LET IDENT ASSIGN expr IN expr
 ** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
 
 program 
-stmt_list EOF 
-stmt SEMICOLON stmt_list // lookahead token appears
-let_stmt // lookahead token is inherited
-LET IDENT ASSIGN expr IN block_expr // lookahead token is inherited
-                         (?)
+expr EOF 
+(?)
 
-** In state 202, looking ahead at SEMICOLON, reducing production
+** In state 203, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+LET IDENT ASSIGN expr IN block_expr 
+                         expr 
+                         bin_expr 
+                         expr . TIMES expr 
+
+** In state 203, looking ahead at TIMES, reducing production
 ** block_body -> expr
 ** is permitted because of the following sub-derivation:
 
-block_body // lookahead token is inherited
-expr . 
+bin_expr 
+expr TIMES expr // lookahead token appears
+LET IDENT ASSIGN expr IN block_expr // lookahead token is inherited
+                         block_body // lookahead token is inherited
+                         expr . 
 
-** In state 202, looking ahead at SEMICOLON, reducing production
+** In state 203, looking ahead at TIMES, reducing production
 ** block_expr -> expr
 ** is permitted because of the following sub-derivation:
 
-expr . 
+bin_expr 
+expr TIMES expr // lookahead token appears
+LET IDENT ASSIGN expr IN block_expr // lookahead token is inherited
+                         expr . 
 
-** Conflict (shift/reduce) in state 171.
+** Conflict (shift/reduce) in state 201.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+LET IDENT ASSIGN expr IN stmt SEMICOLON expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+(?)
+
+** In state 201, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+LET IDENT ASSIGN expr IN block_expr 
+                         block_body 
+                         stmt SEMICOLON block_body 
+                                        expr 
+                                        bin_expr 
+                                        expr . TIMES expr 
+
+** In state 201, looking ahead at TIMES, reducing production
+** block_body -> expr
+** is permitted because of the following sub-derivation:
+
+bin_expr 
+expr TIMES expr // lookahead token appears
+LET IDENT ASSIGN expr IN block_expr // lookahead token is inherited
+                         block_body // lookahead token is inherited
+                         stmt SEMICOLON block_body // lookahead token is inherited
+                                        expr . 
+
+** Conflict (shift/reduce) in state 172.
 ** Tokens involved: PIPE ARROW AND
 ** The following explanations concentrate on token PIPE.
 ** This state is reached from program after reading:
@@ -119,20 +261,20 @@ DATA IDENT ASSIGN constructor_defs
                                type_expr 
                                (?)
 
-** In state 171, looking ahead at PIPE, shifting is permitted
+** In state 172, looking ahead at PIPE, shifting is permitted
 ** because of the following sub-derivation:
 
 NOT type_expr 
     type_expr . PIPE type_expr 
 
-** In state 171, looking ahead at PIPE, reducing production
+** In state 172, looking ahead at PIPE, reducing production
 ** type_expr -> NOT type_expr
 ** is permitted because of the following sub-derivation:
 
 type_expr PIPE type_expr // lookahead token appears
 NOT type_expr . 
 
-** Conflict (shift/reduce) in state 165.
+** Conflict (shift/reduce) in state 166.
 ** Tokens involved: PIPE ARROW AND
 ** The following explanations concentrate on token PIPE.
 ** This state is reached from program after reading:
@@ -152,20 +294,20 @@ DATA IDENT ASSIGN constructor_defs
                                type_expr 
                                (?)
 
-** In state 165, looking ahead at PIPE, shifting is permitted
+** In state 166, looking ahead at PIPE, shifting is permitted
 ** because of the following sub-derivation:
 
 type_expr AND type_expr 
               type_expr . PIPE type_expr 
 
-** In state 165, looking ahead at PIPE, reducing production
+** In state 166, looking ahead at PIPE, reducing production
 ** type_expr -> type_expr AND type_expr
 ** is permitted because of the following sub-derivation:
 
 type_expr PIPE type_expr // lookahead token appears
 type_expr AND type_expr . 
 
-** Conflict (shift/reduce) in state 163.
+** Conflict (shift/reduce) in state 164.
 ** Tokens involved: PIPE ARROW AND
 ** The following explanations concentrate on token PIPE.
 ** This state is reached from program after reading:
@@ -185,20 +327,20 @@ DATA IDENT ASSIGN constructor_defs
                                type_expr 
                                (?)
 
-** In state 163, looking ahead at PIPE, reducing production
+** In state 164, looking ahead at PIPE, reducing production
 ** type_expr -> type_expr ARROW type_expr
 ** is permitted because of the following sub-derivation:
 
 type_expr PIPE type_expr // lookahead token appears
 type_expr ARROW type_expr . 
 
-** In state 163, looking ahead at PIPE, shifting is permitted
+** In state 164, looking ahead at PIPE, shifting is permitted
 ** because of the following sub-derivation:
 
 type_expr ARROW type_expr 
                 type_expr . PIPE type_expr 
 
-** Conflict (shift/reduce) in state 161.
+** Conflict (shift/reduce) in state 162.
 ** Tokens involved: PIPE ARROW AND
 ** The following explanations concentrate on token PIPE.
 ** This state is reached from program after reading:
@@ -218,20 +360,20 @@ DATA IDENT ASSIGN constructor_defs
                                type_expr 
                                (?)
 
-** In state 161, looking ahead at PIPE, shifting is permitted
+** In state 162, looking ahead at PIPE, shifting is permitted
 ** because of the following sub-derivation:
 
 type_expr PIPE type_expr 
                type_expr . PIPE type_expr 
 
-** In state 161, looking ahead at PIPE, reducing production
+** In state 162, looking ahead at PIPE, reducing production
 ** type_expr -> type_expr PIPE type_expr
 ** is permitted because of the following sub-derivation:
 
 type_expr PIPE type_expr // lookahead token appears
 type_expr PIPE type_expr . 
 
-** Conflict (reduce/reduce) in state 150.
+** Conflict (reduce/reduce) in state 151.
 ** Tokens involved: TIMES RPAREN PIPE ARROW AND
 ** The following explanations concentrate on token TIMES.
 ** This state is reached from program after reading:
@@ -251,412 +393,106 @@ DATA IDENT ASSIGN constructor_defs
                                type_expr TIMES type_list // lookahead token appears
                                (?)
 
-** In state 150, looking ahead at TIMES, reducing production
+** In state 151, looking ahead at TIMES, reducing production
 ** constructor_type -> IDENT
 ** is permitted because of the following sub-derivation:
 
 constructor_type // lookahead token is inherited
 IDENT . 
 
-** In state 150, looking ahead at TIMES, reducing production
+** In state 151, looking ahead at TIMES, reducing production
 ** type_expr -> IDENT
 ** is permitted because of the following sub-derivation:
 
 IDENT . 
 
-** Conflict (shift/reduce) in state 82.
+** Conflict (shift/reduce) in state 90.
 ** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
 ** The following explanations concentrate on token TIMES.
 ** This state is reached from program after reading:
 
-bin_expr AND bin_expr
+IF expr THEN expr ELSE expr
 
 ** The derivations that appear below have the following common factor:
 ** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
 
 program 
 expr EOF 
-bin_expr 
 (?)
 
-** In state 82, looking ahead at TIMES, shifting is permitted
+** In state 90, looking ahead at TIMES, shifting is permitted
 ** because of the following sub-derivation:
 
-bin_expr AND bin_expr 
-             bin_expr . TIMES bin_expr 
+IF expr THEN expr ELSE expr 
+                       bin_expr 
+                       expr . TIMES expr 
 
-** In state 82, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr AND bin_expr
+** In state 90, looking ahead at TIMES, reducing production
+** expr -> IF expr THEN expr ELSE expr
 ** is permitted because of the following sub-derivation:
 
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr AND bin_expr . 
+bin_expr 
+expr TIMES expr // lookahead token appears
+IF expr THEN expr ELSE expr . 
 
-** Conflict (shift/reduce) in state 80.
+** Conflict (shift/reduce) in state 85.
 ** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
 ** The following explanations concentrate on token TIMES.
 ** This state is reached from program after reading:
 
-bin_expr DIV bin_expr
+FUN param_list ARROW expr
 
 ** The derivations that appear below have the following common factor:
 ** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
 
 program 
 expr EOF 
-bin_expr 
 (?)
 
-** In state 80, looking ahead at TIMES, shifting is permitted
+** In state 85, looking ahead at TIMES, shifting is permitted
 ** because of the following sub-derivation:
 
-bin_expr DIV bin_expr 
-             bin_expr . TIMES bin_expr 
+lambda_expr 
+FUN param_list ARROW expr 
+                     bin_expr 
+                     expr . TIMES expr 
 
-** In state 80, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr DIV bin_expr
+** In state 85, looking ahead at TIMES, reducing production
+** lambda_expr -> FUN param_list ARROW expr
 ** is permitted because of the following sub-derivation:
 
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr DIV bin_expr . 
+bin_expr 
+expr TIMES expr // lookahead token appears
+lambda_expr // lookahead token is inherited
+FUN param_list ARROW expr . 
 
-** Conflict (shift/reduce) in state 78.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
+** Conflict (shift/reduce) in state 73.
+** Token involved: RPAREN
 ** This state is reached from program after reading:
 
-bin_expr EQ bin_expr
+LPAREN expr COMMA expr
 
 ** The derivations that appear below have the following common factor:
 ** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
 
 program 
 expr EOF 
-bin_expr 
+tuple_expr 
 (?)
 
-** In state 78, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr EQ bin_expr 
-            bin_expr . TIMES bin_expr 
-
-** In state 78, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr EQ bin_expr
+** In state 73, looking ahead at RPAREN, reducing production
+** expr_list -> expr
 ** is permitted because of the following sub-derivation:
 
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr EQ bin_expr . 
+LPAREN expr COMMA expr_list RPAREN // lookahead token appears
+                  expr . 
 
-** Conflict (shift/reduce) in state 76.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr GE bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 76, looking ahead at TIMES, shifting is permitted
+** In state 73, looking ahead at RPAREN, shifting is permitted
 ** because of the following sub-derivation:
 
-bin_expr GE bin_expr 
-            bin_expr . TIMES bin_expr 
+LPAREN expr COMMA expr . RPAREN 
 
-** In state 76, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr GE bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr GE bin_expr . 
-
-** Conflict (shift/reduce) in state 74.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr GT bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 74, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr GT bin_expr 
-            bin_expr . TIMES bin_expr 
-
-** In state 74, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr GT bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr GT bin_expr . 
-
-** Conflict (shift/reduce) in state 72.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr LE bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 72, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr LE bin_expr 
-            bin_expr . TIMES bin_expr 
-
-** In state 72, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr LE bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr LE bin_expr . 
-
-** Conflict (shift/reduce) in state 70.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr LT bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 70, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr LT bin_expr 
-            bin_expr . TIMES bin_expr 
-
-** In state 70, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr LT bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr LT bin_expr . 
-
-** Conflict (shift/reduce) in state 68.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr MINUS bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 68, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr MINUS bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr MINUS bin_expr . 
-
-** In state 68, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr MINUS bin_expr 
-               bin_expr . TIMES bin_expr 
-
-** Conflict (shift/reduce) in state 66.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr MOD bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 66, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr MOD bin_expr 
-             bin_expr . TIMES bin_expr 
-
-** In state 66, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr MOD bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr MOD bin_expr . 
-
-** Conflict (shift/reduce) in state 64.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr NEQ bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 64, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr NEQ bin_expr 
-             bin_expr . TIMES bin_expr 
-
-** In state 64, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr NEQ bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr NEQ bin_expr . 
-
-** Conflict (shift/reduce) in state 62.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr OR bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 62, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr OR bin_expr 
-            bin_expr . TIMES bin_expr 
-
-** In state 62, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr OR bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr OR bin_expr . 
-
-** Conflict (shift/reduce) in state 60.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr PLUS bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 60, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr PLUS bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr PLUS bin_expr . 
-
-** In state 60, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr PLUS bin_expr 
-              bin_expr . TIMES bin_expr 
-
-** Conflict (shift/reduce) in state 58.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr POW bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 58, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr POW bin_expr 
-             bin_expr . TIMES bin_expr 
-
-** In state 58, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr POW bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr POW bin_expr . 
-
-** Conflict (shift/reduce) in state 56.
-** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
-** The following explanations concentrate on token TIMES.
-** This state is reached from program after reading:
-
-bin_expr TIMES bin_expr
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-expr EOF 
-bin_expr 
-(?)
-
-** In state 56, looking ahead at TIMES, shifting is permitted
-** because of the following sub-derivation:
-
-bin_expr TIMES bin_expr 
-               bin_expr . TIMES bin_expr 
-
-** In state 56, looking ahead at TIMES, reducing production
-** bin_expr -> bin_expr TIMES bin_expr
-** is permitted because of the following sub-derivation:
-
-bin_expr TIMES bin_expr // lookahead token appears
-bin_expr TIMES bin_expr . 
-
-** Conflict (shift/reduce) in state 41.
+** Conflict (shift/reduce) in state 71.
 ** Token involved: RPAREN
 ** This state is reached from program after reading:
 
@@ -670,19 +506,439 @@ expr EOF
 app_expr 
 (?)
 
-** In state 41, looking ahead at RPAREN, reducing production
+** In state 71, looking ahead at RPAREN, reducing production
 ** expr_list -> expr COMMA expr_list
 ** is permitted because of the following sub-derivation:
 
 primary_expr LPAREN expr_list RPAREN // lookahead token appears
                     expr COMMA expr_list . 
 
-** In state 41, looking ahead at RPAREN, shifting is permitted
+** In state 71, looking ahead at RPAREN, shifting is permitted
 ** because of the following sub-derivation:
 
 primary_expr primary_expr 
              tuple_expr 
              LPAREN expr COMMA expr_list . RPAREN 
+
+** Conflict (shift/reduce) in state 66.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr AND expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 66, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr AND expr 
+         bin_expr 
+         expr . TIMES expr 
+
+** In state 66, looking ahead at TIMES, reducing production
+** bin_expr -> expr AND expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr AND expr . 
+
+** Conflict (shift/reduce) in state 64.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr DIV expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 64, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr DIV expr 
+         bin_expr 
+         expr . TIMES expr 
+
+** In state 64, looking ahead at TIMES, reducing production
+** bin_expr -> expr DIV expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr DIV expr . 
+
+** Conflict (shift/reduce) in state 62.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr EQ expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 62, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr EQ expr 
+        bin_expr 
+        expr . TIMES expr 
+
+** In state 62, looking ahead at TIMES, reducing production
+** bin_expr -> expr EQ expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr EQ expr . 
+
+** Conflict (shift/reduce) in state 60.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr GE expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 60, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr GE expr 
+        bin_expr 
+        expr . TIMES expr 
+
+** In state 60, looking ahead at TIMES, reducing production
+** bin_expr -> expr GE expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr GE expr . 
+
+** Conflict (shift/reduce) in state 58.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr GT expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 58, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr GT expr 
+        bin_expr 
+        expr . TIMES expr 
+
+** In state 58, looking ahead at TIMES, reducing production
+** bin_expr -> expr GT expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr GT expr . 
+
+** Conflict (shift/reduce) in state 56.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr LE expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 56, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr LE expr 
+        bin_expr 
+        expr . TIMES expr 
+
+** In state 56, looking ahead at TIMES, reducing production
+** bin_expr -> expr LE expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr LE expr . 
+
+** Conflict (shift/reduce) in state 54.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr LT expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 54, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr LT expr 
+        bin_expr 
+        expr . TIMES expr 
+
+** In state 54, looking ahead at TIMES, reducing production
+** bin_expr -> expr LT expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr LT expr . 
+
+** Conflict (shift/reduce) in state 52.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr MINUS expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 52, looking ahead at TIMES, reducing production
+** bin_expr -> expr MINUS expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr MINUS expr . 
+
+** In state 52, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr MINUS expr 
+           bin_expr 
+           expr . TIMES expr 
+
+** Conflict (shift/reduce) in state 50.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr MOD expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 50, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr MOD expr 
+         bin_expr 
+         expr . TIMES expr 
+
+** In state 50, looking ahead at TIMES, reducing production
+** bin_expr -> expr MOD expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr MOD expr . 
+
+** Conflict (shift/reduce) in state 48.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr NEQ expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 48, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr NEQ expr 
+         bin_expr 
+         expr . TIMES expr 
+
+** In state 48, looking ahead at TIMES, reducing production
+** bin_expr -> expr NEQ expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr NEQ expr . 
+
+** Conflict (shift/reduce) in state 46.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr OR expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 46, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr OR expr 
+        bin_expr 
+        expr . TIMES expr 
+
+** In state 46, looking ahead at TIMES, reducing production
+** bin_expr -> expr OR expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr OR expr . 
+
+** Conflict (shift/reduce) in state 44.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr PLUS expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 44, looking ahead at TIMES, reducing production
+** bin_expr -> expr PLUS expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr PLUS expr . 
+
+** In state 44, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr PLUS expr 
+          bin_expr 
+          expr . TIMES expr 
+
+** Conflict (shift/reduce) in state 42.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr POW expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 42, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr POW expr 
+         bin_expr 
+         expr . TIMES expr 
+
+** In state 42, looking ahead at TIMES, reducing production
+** bin_expr -> expr POW expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr POW expr . 
+
+** Conflict (shift/reduce) in state 40.
+** Tokens involved: TIMES POW PLUS OR NEQ MOD MINUS LT LE GT GE EQ DIV AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+expr TIMES expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+(?)
+
+** In state 40, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr TIMES expr 
+           bin_expr 
+           expr . TIMES expr 
+
+** In state 40, looking ahead at TIMES, reducing production
+** bin_expr -> expr TIMES expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+bin_expr // lookahead token is inherited
+expr TIMES expr . 
 
 ** Conflict (shift/reduce) in state 38.
 ** Token involved: RPAREN
@@ -712,8 +968,8 @@ primary_expr primary_expr
              LPAREN expr . RPAREN 
 
 ** Conflict (reduce/reduce) in state 29.
-** Tokens involved: WITH THEN SEMICOLON RPAREN RBRACKET RBRACE PIPE IN EOF ELSE DO COMMA
-** The following explanations concentrate on token EOF.
+** Tokens involved: WITH TIMES THEN SEMICOLON RPAREN RBRACKET RBRACE POW PLUS PIPE OR NEQ MOD MINUS LT LE IN GT GE EQ EOF ELSE DO DIV COMMA AND
+** The following explanations concentrate on token TIMES.
 ** This state is reached from program after reading:
 
 primary_expr
@@ -722,25 +978,56 @@ primary_expr
 ** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
 
 program 
-expr EOF // lookahead token appears
+expr EOF 
+bin_expr 
+expr TIMES expr // lookahead token appears
 (?)
 
-** In state 29, looking ahead at EOF, reducing production
+** In state 29, looking ahead at TIMES, reducing production
 ** expr -> primary_expr
 ** is permitted because of the following sub-derivation:
 
 primary_expr . 
 
-** In state 29, looking ahead at EOF, reducing production
+** In state 29, looking ahead at TIMES, reducing production
 ** unary_expr -> primary_expr
 ** is permitted because of the following sub-derivation:
 
 unary_expr // lookahead token is inherited
 primary_expr . 
 
+** Conflict (reduce/reduce) in state 27.
+** Tokens involved: WITH TIMES THEN SEMICOLON RPAREN RBRACKET RBRACE POW PLUS PIPE OR NEQ MOD MINUS LT LE IN GT GE EQ EOF ELSE DO DIV COMMA AND
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+tuple_expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+expr EOF 
+bin_expr 
+expr TIMES expr // lookahead token appears
+(?)
+
+** In state 27, looking ahead at TIMES, reducing production
+** expr -> tuple_expr
+** is permitted because of the following sub-derivation:
+
+tuple_expr . 
+
+** In state 27, looking ahead at TIMES, reducing production
+** primary_expr -> tuple_expr
+** is permitted because of the following sub-derivation:
+
+primary_expr // lookahead token is inherited
+tuple_expr . 
+
 ** Conflict (reduce/reduce) in state 26.
-** Tokens involved: WITH THEN SEMICOLON RPAREN RBRACKET RBRACE PIPE IN EOF ELSE DO COMMA
-** The following explanations concentrate on token EOF.
+** Tokens involved: WITH TIMES THEN SEMICOLON RPAREN RBRACKET RBRACE POW PLUS PIPE OR NEQ MOD MINUS LT LE IN GT GE EQ EOF ELSE DO DIV COMMA AND
+** The following explanations concentrate on token TIMES.
 ** This state is reached from program after reading:
 
 unary_expr
@@ -749,17 +1036,19 @@ unary_expr
 ** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
 
 program 
-expr EOF // lookahead token appears
+expr EOF 
+bin_expr 
+expr TIMES expr // lookahead token appears
 (?)
 
-** In state 26, looking ahead at EOF, reducing production
+** In state 26, looking ahead at TIMES, reducing production
 ** bin_expr -> unary_expr
 ** is permitted because of the following sub-derivation:
 
 bin_expr // lookahead token is inherited
 unary_expr . 
 
-** In state 26, looking ahead at EOF, reducing production
+** In state 26, looking ahead at TIMES, reducing production
 ** expr -> unary_expr
 ** is permitted because of the following sub-derivation:
 
