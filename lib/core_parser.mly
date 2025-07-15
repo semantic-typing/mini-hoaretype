@@ -60,7 +60,7 @@ while_stmt:
 ;
 
 for_stmt:
-  | FOR IDENT IN expr DO stmt_list { For ($2, $4, $6) }
+  | FOR IDENT IN expr DO stmt_list DONE { For ($2, $4, $6) } (*Hotfix*)
 ;
 
 func_def:
