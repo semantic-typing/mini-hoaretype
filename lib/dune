@@ -1,7 +1,7 @@
 (library
  (name mini_hoaretype)
  (wrapped  false) 
- (modules core_lang core_lexer core_parser Core_parser_module)
+ (modules core_lang core_lexer core_parser Core_parser_module Deep_core_lang)
  (flags (:standard -w -32-33-38))
 )
 
