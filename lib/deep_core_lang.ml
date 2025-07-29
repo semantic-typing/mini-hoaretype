@@ -91,19 +91,42 @@ let rec of_core_expr (e : Core_lang.expr) : expr =
   | Core_lang.Null -> Null
   | Core_lang.Let (x, e1, e2) -> Let (x, of_core_expr e1, of_core_expr e2)
   | Core_lang.Lambda (params, body) -> Lambda (params, of_core_expr body)
-  | Core_lang.App (f, args) -> App (of_core_expr f, List.map of_core_expr args)
+  | Core_lang.App (f, args) ->
+      let f_simple = of_core_expr f in
+      let args_simple = List.map of_core_expr args in
+      let rec build_app func args_list =
+        match args_list with
+        | [] -> func
+        | arg::rest ->
+            Let ("_arg", arg, build_app (App (func, [Var "_arg"])) rest)
+      in
+      Let ("_func", f_simple, build_app (Var "_func") args_simple)
   | Core_lang.Match (e, branches) ->
       Match (of_core_expr e, List.map (fun (p, e) -> (of_core_pattern p, of_core_expr e)) branches)
   | Core_lang.Constructor (c, []) -> Constructor (c, None)
-  | Core_lang.Constructor (c, [e1]) -> Constructor (c, Some (of_core_expr e1))
+  | Core_lang.Constructor (c, [e1]) -> 
+      Let ("_arg", of_core_expr e1,
+        Constructor (c, Some (Var "_arg"))
+      )
   | Core_lang.Constructor (c, es) ->
-      let rec nest = function
+      let es_simple = List.map of_core_expr es in
+      let build_constructor args =
+        match args with
         | [] -> Constructor (c, None)
-        | _::es -> Constructor (c, Some (nest es))
+        | [e] -> Constructor (c, Some e)
+        | e::_ ->
+            Let ("_arg", e,
+              Constructor (c, Some (Var "_arg"))
+            )
       in
-      nest (List.map of_core_expr es)
+      build_constructor es_simple
   | Core_lang.If (cond, texp, fexp) ->
-      Match (of_core_expr cond, [ (PConstructor ("true", None), of_core_expr texp); (PConstructor ("false", None), of_core_expr fexp) ])
+      Let ("_cond", of_core_expr cond,
+        Match (Var "_cond", [
+          (PConstructor ("true", None), of_core_expr texp);
+          (PConstructor ("false", None), of_core_expr fexp)
+        ])
+      )
   | Core_lang.Block exprs ->
       stmts_to_lets exprs Null
   | Core_lang.FieldAccess (e, field) ->
@@ -148,10 +171,7 @@ and stmts_to_lets (stmts : Core_lang.stmt list) (final : expr) : expr =
       let rec_fun =
         RecFun (rec_name, [],
           Match (of_core_expr cond, [
-            (PConstructor ("true", None),
-              let body_let = stmts_to_lets body (App (Var rec_name, [])) in
-              body_let
-            );
+            (PConstructor ("true", None), stmts_to_lets body (App (Var rec_name, [])));
             (PConstructor ("false", None), Null)
           ])
         )
@@ -159,16 +179,10 @@ and stmts_to_lets (stmts : Core_lang.stmt list) (final : expr) : expr =
       Let (rec_name, rec_fun, App (Var rec_name, []))
       |> fun e -> stmts_to_lets rest e
   | Core_lang.For (x, iter, body) :: rest ->
-      let rec_name = "__for" in
-      let iter_var = "__iter" in
+      let rec_name = "__for_" ^ x in
       let rec_fun =
-        RecFun (rec_name, [iter_var],
-          Match (Var iter_var, [
-            (PConstructor ("Nil", None), Null);
-            (PConstructor ("Cons", Some (PVar x)),
-              stmts_to_lets body (App (Var rec_name, [Var iter_var]))
-            )
-          ])
+        RecFun (rec_name, [x],
+          stmts_to_lets body (App (Var rec_name, [Var x]))
         )
       in
       Let (rec_name, rec_fun, App (Var rec_name, [of_core_expr iter]))
@@ -198,21 +212,29 @@ let rec show_expr = function
   | String s -> Printf.sprintf "%S" s
   | Bool b -> string_of_bool b
   | Null -> "null"
-  | Let (x, e1, e2) -> "let " ^ x ^ " = " ^ show_expr e1 ^ " in\n" ^ show_expr e2
+  | Let (x, e1, e2) -> 
+      "let " ^ x ^ " = " ^ show_expr e1 ^ " in\n" ^ show_expr e2
   | Lambda (params, body) ->
       "fun " ^ String.concat " " params ^ " -> " ^ show_expr body
   | App (f, args) ->
-      show_expr f ^ "(" ^ String.concat ", " (List.map show_expr args) ^ ")"
+      (match f, args with
+      | Var op, [e1; e2] when List.mem op ["+"; "-"; "*"; "/"; "=="; "!="; "<"; ">"; "<="; ">="; "&&"; "||"] ->
+          "(" ^ show_expr e1 ^ " " ^ op ^ " " ^ show_expr e2 ^ ")"
+      | Var op, [e] when List.mem op ["!"; "-"] ->
+          op ^ "(" ^ show_expr e ^ ")"
+      | Var f, args ->
+          f ^ "(" ^ String.concat ", " (List.map show_expr args) ^ ")"
+      | _ -> show_expr f ^ "(" ^ String.concat ", " (List.map show_expr args) ^ ")")
   | Match (e, branches) ->
       "match " ^ show_expr e ^ " with\n" ^
-      String.concat "\n" (List.map (fun (p, e) -> "  | " ^ show_pattern p ^ " -> " ^ show_expr e) branches)
+      String.concat "\n" (List.map (fun (p, e) -> "| " ^ show_pattern p ^ " -> " ^ show_expr e) branches)
   | Constructor (c, None) -> c
   | Constructor (c, Some e) -> c ^ "(" ^ show_expr e ^ ")"
   | RecFun (name, params, body) ->
-      "recfun " ^ name ^ "(" ^ String.concat ", " params ^ ") = " ^ show_expr body
+      "let rec " ^ name ^ " = fun " ^ String.concat " " params ^ " -> " ^ show_expr body
 
 let show_program (prog : program) : string =
-  String.concat "\n" (List.map show_expr prog) 
+  String.concat "\n\n" (List.map show_expr prog) 
 
 let rec string_of_value = function
   | VInt n -> string_of_int n
