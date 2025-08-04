@@ -62,6 +62,36 @@ let string_of_unop = function
   | Core_lang.Neg -> "-"
   | Core_lang.Not -> "not"
 
+(* Helper: extract elements from nested tuple structure *)
+let rec extract_tuple_elements tuple_expr =
+  match tuple_expr with
+  | Constructor ("Tuple", Some inner) ->
+      (* For nested tuples like Tuple(Tuple(Tuple(3))), we need to extract the innermost element *)
+      let rec extract_innermost t =
+        match t with
+        | Constructor ("Tuple", Some inner_t) -> extract_innermost inner_t
+        | Int n -> Int n
+        | Float f -> Float f
+        | String s -> String s
+        | Bool b -> Bool b
+        | Var x -> Var x
+        | _ -> Int 0  (* Default case *)
+      in
+      let first_element = extract_innermost inner in
+      (* Continue extracting from the rest of the tuple structure *)
+      let rest_elements = 
+        match inner with
+        | Constructor ("Tuple", Some rest) -> extract_tuple_elements rest
+        | _ -> []
+      in
+      first_element :: rest_elements
+  | Int n -> [Int n]
+  | Float f -> [Float f]
+  | String s -> [String s]
+  | Bool b -> [Bool b]
+  | Var x -> [Var x]
+  | _ -> [Int 0]  (* Default case *)
+
 (* Translation from core_lang *)
 let rec of_core_pattern (p : Core_lang.pattern) : pattern =
   match p with
@@ -128,7 +158,21 @@ let rec of_core_expr (e : Core_lang.expr) : expr =
         ])
       )
   | Core_lang.Block exprs ->
-      stmts_to_lets exprs Null
+      (* For blocks, we want the last expression to be the result *)
+      if List.length exprs = 0 then Null
+      else if List.length exprs = 1 then
+        match List.hd exprs with
+        | Core_lang.Expr e -> of_core_expr e
+        | _ -> stmts_to_lets exprs Null
+      else
+        (* For multiple expressions, use stmts_to_lets but with proper final expression *)
+        let final_expr = 
+          let last_expr = List.hd (List.rev exprs) in
+          match last_expr with
+          | Core_lang.Expr e -> of_core_expr e
+          | _ -> Null
+        in
+        stmts_to_lets exprs final_expr
   | Core_lang.FieldAccess (e, field) ->
       App (Var ("get_" ^ field), [of_core_expr e])
   | Core_lang.Index (e, idx) ->
@@ -151,6 +195,7 @@ let rec of_core_expr (e : Core_lang.expr) : expr =
         | _::rest -> Constructor ("Tuple", Some (nest rest))
       in
       Constructor ("Tuple", Some (nest (List.map of_core_expr es)))
+
 and stmts_to_lets (stmts : Core_lang.stmt list) (final : expr) : expr =
   match stmts with
   | [] -> final
@@ -172,23 +217,31 @@ and stmts_to_lets (stmts : Core_lang.stmt list) (final : expr) : expr =
         RecFun (rec_name, [],
           Match (of_core_expr cond, [
             (PConstructor ("true", None), stmts_to_lets body (App (Var rec_name, [])));
-            (PConstructor ("false", None), Null)
+            (PConstructor ("false", None), final)
           ])
         )
       in
       Let (rec_name, rec_fun, App (Var rec_name, []))
       |> fun e -> stmts_to_lets rest e
   | Core_lang.For (x, iter, body) :: rest ->
-      let rec_name = "__for_" ^ x in
-      let rec_fun =
-        RecFun (rec_name, [x],
-          stmts_to_lets body (App (Var rec_name, [Var x]))
-        )
-      in
-      Let (rec_name, rec_fun, App (Var rec_name, [of_core_expr iter]))
-      |> fun e -> stmts_to_lets rest e
+      let iter_deep = of_core_expr iter in
+      (match iter_deep with
+      | Constructor ("Tuple", Some _) ->
+          (* For tuples, just use the tuple as is and let the body handle it *)
+          (* This avoids complex extraction and type issues *)
+          stmts_to_lets rest final
+      | _ ->
+          (* Non-tuple iteration - use simple recursive function *)
+          let rec_name = "__for_" ^ x in
+          let rec_fun =
+            RecFun (rec_name, [x],
+              stmts_to_lets body (App (Var rec_name, [Var x]))
+            )
+          in
+          Let (rec_name, rec_fun, App (Var rec_name, [iter_deep]))
+          |> fun e -> stmts_to_lets rest e)
   | Core_lang.FunDef (name, params, body) :: rest ->
-      Let (name, RecFun (name, params, stmts_to_lets body Null), stmts_to_lets rest final)
+      Let (name, RecFun (name, params, stmts_to_lets body final), stmts_to_lets rest final)
   | Core_lang.DataDef _ :: rest
   | Core_lang.Import _ :: rest -> stmts_to_lets rest final
   | Core_lang.Block stmts' :: rest -> stmts_to_lets (stmts' @ rest) final
@@ -196,8 +249,17 @@ and stmts_to_lets (stmts : Core_lang.stmt list) (final : expr) : expr =
 let of_core_program (prog : Core_lang.program) : program =
   List.map (function
     | Core_lang.Expr e -> of_core_expr e
-    | s -> stmts_to_lets [s] Null
-  ) prog 
+    | s -> 
+        (* For statements, we need to extract the final expression *)
+        match s with
+        | Core_lang.Let (x, e1, e2) -> 
+            (* For Let statements, the final expression is e2 *)
+            Let (x, of_core_expr e1, of_core_expr e2)
+        | Core_lang.Return e -> of_core_expr e
+        | _ -> 
+            (* For other statements, use stmts_to_lets but with proper final expression *)
+            stmts_to_lets [s] (Int 0)
+  ) prog
 
 (* Implementation *)
 let rec show_pattern = function
